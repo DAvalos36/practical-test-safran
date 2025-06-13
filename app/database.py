@@ -24,6 +24,11 @@ def seed():
 
     session = get_db_session()
 
+    currentUsers = session.query(User).count()
+    
+    if currentUsers > 0:
+        return
+
     try:
         user = User(name="María González", username="maria123", password="password123")
         session.add(user)
