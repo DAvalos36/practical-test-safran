@@ -1,8 +1,16 @@
+from app.schemas.auth import UserRegistrationInput
 from typing import Union
+from app.controllers.auth import router
 
 from fastapi import FastAPI
 
+from app.database import create_tables
+
 app = FastAPI()
+
+app.include_router(router, prefix="/api", tags=["auth"])
+
+create_tables()
 
 
 @app.get("/")
