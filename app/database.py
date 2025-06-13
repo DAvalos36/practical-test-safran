@@ -1,46 +1,63 @@
-from sqlalchemy import Column, Integer, Text, Numeric, ForeignKey, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from app.models.models import Base, User, Question, Answer
 
-Base = declarative_base()
+DATABASE_URL = "sqlite:///database.db"
+engine = create_engine(DATABASE_URL, echo=False)
 
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-class User(Base):
-    __tablename__ = 'users'
+def get_db_session():
+    session = SessionLocal()
+    try:
+        return session
+    except Exception:
+        session.close()
+        raise
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(Text)
-    username = Column(Text)
-    password = Column(Text)
+def create_tables():
+    Base.metadata.create_all(bind=engine)
+    print("Tablas creadas exitosamente")
+    seed()
 
-    # Relación uno a muchos con questions
-    questions = relationship("Question", back_populates="user", cascade="all, delete-orphan")
+def seed():
 
+    session = get_db_session()
 
-class Question(Base):
-    __tablename__ = 'questions'
+    try:
+        user = User(name="María González", username="maria123", password="password123")
+        session.add(user)
+        session.commit()
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'))
-    question = Column(Text)
+        question = Question(
+            question="¿De qué color es el cielo?",
+            user_id=user.id
+        )
+        session.add(question)
+        session.commit()
 
-    # Relaciones
-    user = relationship("User", back_populates="questions")
-    answers = relationship("Answer", back_populates="question", cascade="all, delete-orphan")
+        respuestas = [
+            {"answer": "Rojo", "prediction": 0.1},
+            {"answer": "Verde", "prediction": 0.05},
+            {"answer": "Azul", "prediction": 0.85},
+        ]
 
+        for resp_data in respuestas:
+            answer = Answer(
+                answer=resp_data["answer"],
+                prediction=resp_data["prediction"],
+                question_id=question.id
+            )
+            session.add(answer)
 
-class Answer(Base):
-    __tablename__ = 'answers'
+        session.commit()
+        print("Seed guardada exitosamente")
+    except Exception as e:
+        session.rollback()
+        print(f"Error: {e}")
+    finally:
+        session.close()
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    question_id = Column(Integer, ForeignKey('questions.id', ondelete='CASCADE', onupdate='CASCADE'))
-    answer = Column(Text)
-    prediction = Column(Numeric)
-
-    # Relación con question
-    question = relationship("Question", back_populates="answers")
-
-# Configuración de la base de datos (opcional)
-# engine = create_engine('sqlite:///database.db', echo=True)
-# Base.metadata.create_all(engine)
-# Session = sessionmaker(bind=engine)
+def drop_tables():
+    Base.metadata.drop_all(bind=engine)
+    print("Tablas eliminadas")
