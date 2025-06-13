@@ -1,5 +1,7 @@
-from fastapi import APIRouter 
+from fastapi import APIRouter, HTTPException
 from passlib.hash import bcrypt
+#from sqlite3 import IntegrityError
+from sqlalchemy.exc import IntegrityError 
 
 from ..schemas.auth import UserRegistrationInput
 from ..models.models import User
@@ -13,8 +15,17 @@ def register(data: UserRegistrationInput):
     hashed_password = bcrypt.hash(data.password)
     user = User(username=data.username, password=hashed_password, name=data.name)
 
-    db.add(user)
-    db.commit()
+    try:
+        db.add(user)
+        db.commit()
+        return {"message": "User registered successfully"}
 
-    return {"message": "User registered successfully"}, 200
+    except IntegrityError as e:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Username already exists")
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
     
