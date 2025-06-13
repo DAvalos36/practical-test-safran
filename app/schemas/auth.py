@@ -6,3 +6,14 @@ class UserRegistrationInput(BaseModel):
     username: str = Field(min_length=3, max_length=64)
     password: str = Field(min_length=3, max_length=64)
 
+class UserLoginInput(BaseModel):
+    username: str = Field(min_length=3, max_length=64)
+    password: str = Field(min_length=3, max_length=64)
+
+class UserLoginOutput(BaseModel):
+    id: int
+    name: str
+    username: str
+    jwt_token: str
+
+
