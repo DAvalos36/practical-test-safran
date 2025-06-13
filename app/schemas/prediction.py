@@ -10,7 +10,7 @@ class PredicitionInput(BaseModel):
     answers: List[PredictionAnswerInput] = Field(min_items=1, max_items=10)
 
 class PredictionAnswerOutput(BaseModel):
-    answer: PredictionAnswerInput
+    answer: str
     prediction: float = Field(ge=0.0, le=100.0)
 
 class PredictionOutput(BaseModel):
