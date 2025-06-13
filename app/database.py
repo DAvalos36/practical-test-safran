@@ -30,7 +30,7 @@ def seed():
         return
 
     try:
-        user = User(name="María González", username="maria123", password="password123")
+        user = User(name="María González", username="maria123", password="$2b$12$cl.6uzatAc1rgA8fJa2faulB/c8e6nOqErQg2.O2cqZQx/2ML5wCi")
         session.add(user)
         session.commit()
 

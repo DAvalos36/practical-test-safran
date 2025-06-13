@@ -10,7 +10,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(Text)
-    username = Column(Text)
+    username = Column(Text, unique=True)
     password = Column(Text)
 
     # Relación uno a muchos con questions
